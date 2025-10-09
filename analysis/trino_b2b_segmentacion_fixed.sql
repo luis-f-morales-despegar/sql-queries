@@ -1,3 +1,5 @@
+
+
 WITH a AS (
   SELECT
     s.group_code,
@@ -147,9 +149,7 @@ WITH a AS (
       ) cvr
       WHERE row_num = 1 OR row_num IS NULL
       GROUP BY group_code, cvr.fecha
-
       UNION ALL
-
       SELECT
         group_code,
         l2b.hsm_date AS fecha,
@@ -309,4 +309,5 @@ SELECT
   a.partition_date
 FROM a
 LEFT JOIN b ON a.group_code = b.group_code
-WHERE a.group_code IS NOT NULL;
+WHERE a.group_code IS NOT null
+and a.group_code = 'AG00008903'
