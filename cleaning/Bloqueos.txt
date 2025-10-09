@@ -1,0 +1,124 @@
+select 
+-- Header
+status      as Estatus
+, firewall  as Plataforma
+-- Llaves primarias
+, case 
+ when rule = 'NA' then ''
+ else rule 
+end as Moses_ID
+, oid       as Despegar_ID 
+, ap        as Client_ID 
+-- Detalle producto
+, portfolio as Portafolio
+, ejecutivo as Ejecutivo
+, propiedad as Tipo_Propiedad
+, cadena    as Cadena
+, provider  as Gateway
+, hotel     as Hotel
+-- Detalle cliente
+, modelo    as Modelo
+, sitio     as PoS
+, canal     as Canal
+, agencia   as Cliente
+-- Detalle impacto
+, case
+    when monthly_impact = 'NA' then 0
+    else cast(monthly_impact as double)
+  end as Monthly_Cost 
+--, strategy as Estrategia
+--, release_status as Apertura_Estatus
+--, release_date   as Apertura_Fecha
+from
+raw.b2b_block_compiler
+where 1=1 
+and sitio in ('US', 'PA')
+and cadena in ('Palladium', 'Accor Hotels')
+order by cast(monthly_impact as double) desc
+
+
+----
+select *
+from raw.b2b_block_compiler
+
+-----
+
+--Por cadena:
+
+select 
+-- Header
+status      as Estatus
+--, firewall  as Plataforma
+-- Llaves primarias
+--, case 
+-- when rule = 'NA' then ''
+-- else rule 
+--end as Moses_ID
+--, oid       as Despegar_ID 
+--, ap        as Client_ID 
+-- Detalle producto
+, portfolio as Portafolio
+, ejecutivo as Ejecutivo
+, propiedad as Tipo_Propiedad
+, cadena    as Cadena
+, provider  as Gateway
+--, hotel     as Hotel
+-- Detalle cliente
+, modelo    as Modelo
+--, sitio     as PoS
+--, canal     as Canal
+--, agencia   as Cliente
+-- Detalle impacto
+, SUM(case
+    when monthly_impact = 'NA' then 0
+    else cast(monthly_impact as double)
+  end) as Monthly_Cost 
+--, strategy as Estrategia
+--, release_status as Apertura_Estatus
+--, release_date   as Apertura_Fecha
+from
+raw.b2b_block_compiler
+where 1=1 
+group by 1,2,3,4,5,6,7
+order by cast(monthly_impact as double) desc
+
+
+
+SELECT 
+  Estatus,
+  Portafolio,
+ -- Ejecutivo,
+--  Tipo_Propiedad,
+  Cadena,
+  Gateway,
+ -- Modelo,
+  Monthly_Cost
+FROM (
+  SELECT 
+    status      AS Estatus,
+    portfolio   AS Portafolio,
+  --  ejecutivo   AS Ejecutivo,
+ --   propiedad   AS Tipo_Propiedad,
+    cadena      AS Cadena,
+    provider    AS Gateway,
+ --   modelo      AS Modelo,
+    ROUND(SUM(
+      CASE 
+        WHEN monthly_impact = 'NA' THEN 0 
+        ELSE CAST(monthly_impact AS DOUBLE) 
+      END
+    ),2) AS Monthly_Cost
+  FROM raw.b2b_block_compiler
+  WHERE 1=1 
+  GROUP BY 
+    status,
+    portfolio,
+ --   ejecutivo,
+ --   propiedad,
+    cadena,
+    provider
+  --  modelo
+) AS subconsulta
+where Cadena in ('Accor Hotels', 'Palladium')
+ORDER BY Monthly_Cost desc;
+
