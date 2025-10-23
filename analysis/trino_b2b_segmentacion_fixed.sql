@@ -1,5 +1,3 @@
-
-
 WITH a AS (
   SELECT
     s.group_code,
@@ -20,8 +18,7 @@ WITH a AS (
     COALESCE(SUM(CASE WHEN s.gestion_date >= CAST(date_trunc('year', current_date) AS DATE) THEN s.gb ELSE 0 END), 0) AS gb_ytd,
     COALESCE(SUM(CASE
       WHEN s.gestion_date >= CAST(date_trunc('year', date_add('year', -1, current_date)) AS DATE)
-       AND s.gestion_date < CAST(date_trunc('year', current_date) AS DATE)
-       AND s.gestion_date < date_add('day', date_diff('day', CAST(date_trunc('year', current_date) AS DATE), current_date), date_add('year', -1, current_date))
+       AND s.gestion_date <= date_add('year', -1, date_add('day', -1, current_date))
       THEN s.gb ELSE 0
     END), 0) AS gb_ytd_ly,
     COALESCE(SUM(CASE WHEN s.gestion_date >= date_add('day', -90, current_date) AND s.gestion_date <= date_add('day', -1, current_date) AND s.productooriginal = 'Actividades' THEN s.gb ELSE 0 END), 0) AS gb_actividades_l90d,
@@ -65,11 +62,12 @@ WITH a AS (
       SELECT p.transaction_id AS product_id_original, MAX(p.net_commission_partner * p.conversion_rate) AS tpc_usd
       FROM lake.channels_bo_product p
       JOIN lake.channels_bo_sale s ON s.id = p.sale_id
-      WHERE CAST(s.created AS DATE) >= DATE '2024-01-01' AND CAST(s.created AS DATE) < current_date
+      WHERE CAST(s.created AS DATE) >= date_add('year', -1, CAST(date_trunc('year', current_date) AS DATE))
+        AND CAST(s.created AS DATE) < current_date
       GROUP BY p.transaction_id
     ) bo ON bo.product_id_original = fh.origin_product_id
-    WHERE fh.gestion_date BETWEEN DATE '2024-01-01' AND date_add('day', -1, current_date)
-      AND fh.partition_period >= '2024-01'
+    WHERE fh.gestion_date BETWEEN date_add('year', -1, CAST(date_trunc('year', current_date) AS DATE)) AND date_add('day', -1, current_date)
+      AND fh.partition_period >= date_format(date_add('year', -1, CAST(date_trunc('year', current_date) AS DATE)), '%Y-%m')
       AND fh.line_of_business_code = 'B2B'
       AND pnl.line_of_business = 'B2B'
     GROUP BY gestion_date, fh.parent_channel, fh.buy_type_code, group_code
@@ -198,7 +196,7 @@ b AS (
                                ELSE fh.partner_id
                             END
       WHERE fh.gestion_date BETWEEN date_add('day', -365, current_date) AND date_add('day', -1, current_date)
-        AND fh.partition_period >= '2024-01'
+        AND fh.partition_period >= date_format(date_add('month', -12, current_date), '%Y-%m')
         AND fh.line_of_business_code = 'B2B'
         AND pnl.line_of_business = 'B2B'
         AND group_code IS NOT NULL
@@ -310,4 +308,39 @@ SELECT
 FROM a
 LEFT JOIN b ON a.group_code = b.group_code
 WHERE a.group_code IS NOT null
-and a.group_code = 'AG00008903'
+and a.group_code in ('AG00015197')
+
+
+
+
+
+
+--PBI:
+
+    WITH maxp AS (
+  SELECT MAX(partition_date) AS d
+  FROM data.lake.segment_ag_group
+  WHERE partition_date IN (
+    date_add('day', -0, current_date),
+    date_add('day', -1, current_date),
+    date_add('day', -2, current_date),
+    date_add('day', -3, current_date),
+    date_add('day', -4, current_date),
+    date_add('day', -5, current_date),
+    date_add('day', -6, current_date),
+    date_add('day', -7, current_date)
+  )
+)
+SELECT seg.*
+FROM data.lake.segment_ag_group seg
+WHERE seg.partition_date IN (
+  date_add('day', -0, current_date),
+  date_add('day', -1, current_date),
+  date_add('day', -2, current_date),
+  date_add('day', -3, current_date),
+  date_add('day', -4, current_date),
+  date_add('day', -5, current_date),
+  date_add('day', -6, current_date),
+  date_add('day', -7, current_date)
+)
+AND seg.partition_date = (SELECT d FROM maxp)
