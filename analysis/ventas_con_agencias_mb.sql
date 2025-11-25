@@ -14,7 +14,7 @@ WITH agencias_mb AS (
         ch.channel_name,
         ctr.conector
     FROM data.lake.ch_bo_partner_partner pp
-    LEFT JOIN data.lake.ch_bo_partner_partner_intermediary pi ON pp.partner_intermediary_id = pp.id
+    LEFT JOIN data.lake.ch_bo_partner_partner_intermediary pi ON pp.partner_intermediary_id = pi.id
     LEFT JOIN data.lake.ch_bo_partner_partner_joiner pj ON pj.attached = pp.id
     LEFT JOIN data.lake.ch_bo_partner_partner ag ON pj.joiner = ag.id
     LEFT JOIN data.lake.ch_bo_partner_channel ch ON pp.id = ch.id_partner
@@ -22,7 +22,6 @@ WITH agencias_mb AS (
     WHERE
         (pp.business IN ('hoteldo','hoteldo_affiliated')
          OR (pp.business = 'despegar' AND channel_name IN ('expedia','agency-pam-pp-ctrip')))
-        AND conector LIKE '%TRAVELGATE%'
     GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
 ),
 ventas AS (
