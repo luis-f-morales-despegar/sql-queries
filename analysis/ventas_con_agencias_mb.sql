@@ -22,7 +22,6 @@ WITH agencias_mb AS (
     WHERE
         (pp.business IN ('hoteldo','hoteldo_affiliated')
          OR (pp.business = 'despegar' AND channel_name IN ('expedia','agency-pam-pp-ctrip')))
-        AND conector LIKE '%TRAVELGATE%'
     GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
 ),
 ventas AS (
