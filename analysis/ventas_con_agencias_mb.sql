@@ -139,12 +139,12 @@ ventas AS (
     LEFT JOIN data.tmp.mktg_funds d ON CAST(d.product_id AS VARCHAR) = CAST(pnl.product_id AS VARCHAR)
     LEFT JOIN data.tmp.mkt_funds_bd1 mkt ON mkt.product_id = fh.product_id
     WHERE fh.recognition_date >= CAST('2024-01-01' AS DATE)
-      AND fh.partition_period > '2024-01-01'
+      AND fh.partition_period > '2023-01-01'
       AND fh.lob_gestion IN ('stg__sales_b2bnohoteldo','stg_sales__b2bhoteldo')
       AND pnl.line_of_business = 'B2B'
       AND fh.parent_channel = 'API'
-      AND t.reservation_year_month > CAST('2024-01-01' AS DATE)
-      AND pnl.date_reservation_year_month > '2024-01'
+      AND t.reservation_year_month > CAST('2023-01-01' AS DATE)
+      AND pnl.date_reservation_year_month > '2023-01'
     GROUP BY 1,2,3,4,5,6,7,8,9,10
 )
 SELECT
