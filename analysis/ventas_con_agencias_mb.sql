@@ -138,7 +138,7 @@ ventas AS (
     LEFT JOIN data.tmp.correccion_be be ON CAST(be.product_id AS VARCHAR) = CAST(pnl.product_id AS VARCHAR)
     LEFT JOIN data.tmp.mktg_funds d ON CAST(d.product_id AS VARCHAR) = CAST(pnl.product_id AS VARCHAR)
     LEFT JOIN data.tmp.mkt_funds_bd1 mkt ON mkt.product_id = fh.product_id
-    WHERE fh.recognition_date >= CAST('2025-11-01' AS DATE)
+    WHERE fh.recognition_date >= CAST('2024-01-01' AS DATE)
       AND fh.partition_period > '2024-01-01'
       AND fh.lob_gestion IN ('stg__sales_b2bnohoteldo','stg_sales__b2bhoteldo')
       AND pnl.line_of_business = 'B2B'
